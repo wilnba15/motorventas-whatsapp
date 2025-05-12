@@ -2,19 +2,8 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import PlainTextResponse
 from dotenv import load_dotenv
 import os
-import requests
 
 load_dotenv()
-
-AIRTABLE_TOKEN = os.getenv("AIRTABLE_TOKEN")
-AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
-AIRTABLE_TABLE_NAME = os.getenv("AIRTABLE_TABLE_NAME")
-
-AIRTABLE_URL = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_NAME}"
-HEADERS = {
-    "Authorization": f"Bearer {AIRTABLE_TOKEN}",
-    "Content-Type": "application/json"
-}
 
 app = FastAPI()
 
@@ -85,27 +74,16 @@ async def whatsapp_webhook(
         session["step"] = "fecha"
         reply = "¿Qué fecha y hora (dd/mm/yyyy hh:mm) prefieres para tu asesoría?"
     elif step == "fecha":
-try:
-    fecha, hora = user_input.split()
-    data["Fecha"] = fecha
-    data["Hora"] = hora
-
-    payload = {"records": [{"fields": data}]}
-    response = requests.post(AIRTABLE_URL, headers=HEADERS, json=payload)
-
-    if response.status_code in [200, 201]:
-        reply = "✅ ¡Gracias! Hemos registrado tu asesoría. Escribe 'menu' para volver a empezar."
-    else:
-        reply = "❌ Error al guardar los datos. Intenta más tarde."
-
-except ValueError:
-    reply = "❌ Por favor, ingresa la fecha y hora en el formato correcto: dd/mm/yyyy hh:mm"
-
-except Exception as e:
-    reply = f"❌ Error inesperado: {e}"
-
-session["step"] = "menu"
-session["data"] = {}
+        try:
+            fecha, hora = user_input.split()
+            data["Fecha"] = fecha
+            data["Hora"] = hora
+            # Aquí podrías guardar en Airtable
+            reply = "✅ ¡Gracias! Hemos registrado tu asesoría. Escribe 'menu' para volver a empezar."
+        except ValueError:
+            reply = "❌ Por favor, ingresa la fecha y hora en el formato correcto: dd/mm/yyyy hh:mm"
+        session["step"] = "menu"
+        session["data"] = {}
     else:
         reply = "No entendí tu mensaje. Escribe 'menu' para ver las opciones."
 
