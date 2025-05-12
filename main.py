@@ -18,7 +18,6 @@ HEADERS = {
 }
 
 app = FastAPI()
-
 user_states = {}
 
 @app.post("/webhook")
@@ -63,7 +62,7 @@ async def whatsapp_webhook(
         elif user_input == "4":
             reply = "📄 Descarga aquí nuestro catálogo: https://example.com/catalogo.pdf"
         elif user_input == "5":
-            numero_asesor = "593986138541"  # Cambiar por el número real del asesor
+            numero_asesor = "593987654321"
             mensaje = "Hola, necesito ayuda con mi asesoría de Motor en Ventas"
             enlace = f"https://wa.me/{numero_asesor}?text={mensaje.replace(' ', '%20')}"
 
@@ -73,6 +72,9 @@ async def whatsapp_webhook(
                 f"👉 Haz clic aquí para escribirle directamente por WhatsApp:\n{enlace}\n\n"
                 "Casos comunes:\n- Consultas sobre propuestas o precios\n- Problemas con formularios o facturación"
             )
+
+            session["step"] = "menu"
+            session["data"] = {}
         else:
             reply = "Opción no válida. Escribe 'menu' para ver opciones."
     elif step == "nombre":
@@ -104,10 +106,8 @@ async def whatsapp_webhook(
                 reply = "✅ ¡Gracias! Hemos registrado tu asesoría. Escribe 'menu' para volver a empezar."
             else:
                 reply = "❌ Error al guardar los datos. Intenta más tarde."
-
         except ValueError:
             reply = "❌ Por favor, ingresa la fecha y hora en el formato correcto: dd/mm/yyyy hh:mm"
-
         except Exception as e:
             reply = f"❌ Error inesperado: {e}"
 
