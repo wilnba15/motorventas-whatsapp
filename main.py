@@ -62,17 +62,13 @@ async def whatsapp_webhook(
         elif user_input == "4":
             reply = "📄 Descarga aquí nuestro catálogo: https://example.com/catalogo.pdf"
         elif user_input == "5":
-            numero_asesor = "593987654321"
-            mensaje = "Hola, necesito ayuda con mi asesoría de Motor en Ventas"
-            enlace = f"https://wa.me/{numero_asesor}?text={mensaje.replace(' ', '%20')}"
-
+            enlace = "https://wa.me/593987654321?text=Hola%2C%20necesito%20ayuda%20con%20mi%20asesor%C3%ADa"
             reply = (
                 "👤 Te transfiero con un asesor humano.\n"
                 "🕘 Atención de Lunes a Viernes, 9:00 am a 6:00 pm\n"
                 f"👉 Haz clic aquí para escribirle directamente por WhatsApp:\n{enlace}\n\n"
                 "Casos comunes:\n- Consultas sobre propuestas o precios\n- Problemas con formularios o facturación"
             )
-
             session["step"] = "menu"
             session["data"] = {}
         else:
