@@ -19,7 +19,6 @@ HEADERS = {
 
 app = FastAPI()
 
-# Estados de sesión simples (en producción usar una base de datos o Redis)
 user_states = {}
 
 @app.post("/webhook")
@@ -31,7 +30,6 @@ async def whatsapp_webhook(
     user_id = From
     user_input = Body.strip().lower()
 
-    # Inicializa sesión del usuario si no existe
     if user_id not in user_states:
         user_states[user_id] = {"step": "menu", "data": {}}
 
@@ -65,7 +63,16 @@ async def whatsapp_webhook(
         elif user_input == "4":
             reply = "📄 Descarga aquí nuestro catálogo: https://example.com/catalogo.pdf"
         elif user_input == "5":
-            reply = "📞 Un asesor humano se comunicará contigo vía WhatsApp."
+            numero_asesor = "593986138541"  # Cambiar por el número real del asesor
+            mensaje = "Hola, necesito ayuda con mi asesoría de Motor en Ventas"
+            enlace = f"https://wa.me/{numero_asesor}?text={mensaje.replace(' ', '%20')}"
+
+            reply = (
+                "👤 Te transfiero con un asesor humano.\n"
+                "🕘 Atención de Lunes a Viernes, 9:00 am a 6:00 pm\n"
+                f"👉 Haz clic aquí para escribirle directamente por WhatsApp:\n{enlace}\n\n"
+                "Casos comunes:\n- Consultas sobre propuestas o precios\n- Problemas con formularios o facturación"
+            )
         else:
             reply = "Opción no válida. Escribe 'menu' para ver opciones."
     elif step == "nombre":
