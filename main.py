@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import PlainTextResponse
 from dotenv import load_dotenv
@@ -38,7 +39,6 @@ async def whatsapp_webhook(
     step = session["step"]
     data = session["data"]
 
-    # Lógica del flujo conversacional
     if user_input in ["menu", "inicio", "salir"]:
         session["step"] = "menu"
         session["data"] = {}
@@ -85,27 +85,27 @@ async def whatsapp_webhook(
         session["step"] = "fecha"
         reply = "¿Qué fecha y hora (dd/mm/yyyy hh:mm) prefieres para tu asesoría?"
     elif step == "fecha":
-try:
-    fecha, hora = user_input.split()
-    data["Fecha"] = fecha
-    data["Hora"] = hora
+        try:
+            fecha, hora = user_input.split()
+            data["Fecha"] = fecha
+            data["Hora"] = hora
 
-    payload = {"records": [{"fields": data}]}
-    response = requests.post(AIRTABLE_URL, headers=HEADERS, json=payload)
+            payload = {"records": [{"fields": data}]}
+            response = requests.post(AIRTABLE_URL, headers=HEADERS, json=payload)
 
-    if response.status_code in [200, 201]:
-        reply = "✅ ¡Gracias! Hemos registrado tu asesoría. Escribe 'menu' para volver a empezar."
-    else:
-        reply = "❌ Error al guardar los datos. Intenta más tarde."
+            if response.status_code in [200, 201]:
+                reply = "✅ ¡Gracias! Hemos registrado tu asesoría. Escribe 'menu' para volver a empezar."
+            else:
+                reply = "❌ Error al guardar los datos. Intenta más tarde."
 
-except ValueError:
-    reply = "❌ Por favor, ingresa la fecha y hora en el formato correcto: dd/mm/yyyy hh:mm"
+        except ValueError:
+            reply = "❌ Por favor, ingresa la fecha y hora en el formato correcto: dd/mm/yyyy hh:mm"
 
-except Exception as e:
-    reply = f"❌ Error inesperado: {e}"
+        except Exception as e:
+            reply = f"❌ Error inesperado: {e}"
 
-session["step"] = "menu"
-session["data"] = {}
+        session["step"] = "menu"
+        session["data"] = {}
     else:
         reply = "No entendí tu mensaje. Escribe 'menu' para ver las opciones."
 
