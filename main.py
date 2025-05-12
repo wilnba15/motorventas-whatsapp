@@ -36,80 +36,85 @@ async def whatsapp_webhook(
     step = session["step"]
     data = session["data"]
 
-    if user_input in ["menu", "inicio", "salir"]:
-        session["step"] = "menu"
-        session["data"] = {}
-        reply = (
-            "Hola 👋 ¿En qué te puedo ayudar hoy?\n"
-            "1. Conocer nuestros servicios\n"
-            "2. Agendar asesoría gratuita\n"
-            "3. Ver promociones\n"
-            "4. Descargar contenidos útiles\n"
-            "5. Hablar con un asesor humano"
-        )
-    elif step == "menu":
-        if user_input == "1":
+    try:
+        if user_input in ["menu", "inicio", "salir"]:
+            session["step"] = "menu"
+            session["data"] = {}
             reply = (
-                "Ofrecemos:\n- Campañas en Meta, Google, TikTok, X\n- Branding y posicionamiento\n"
-                "- Diseño web (SEO/SEM)\n- Foto y video profesional\n- COFEPRIS (salud)\n"
-                "- Consultoría comercial\n\n¿Deseas agendar asesoría gratuita? (Escribe '2')"
+                "Hola 👋 ¿En qué te puedo ayudar hoy?\n"
+                "1. Conocer nuestros servicios\n"
+                "2. Agendar asesoría gratuita\n"
+                "3. Ver promociones\n"
+                "4. Descargar contenidos útiles\n"
+                "5. Hablar con un asesor humano"
             )
-        elif user_input == "2":
-            session["step"] = "nombre"
-            reply = "Perfecto. ¿Cuál es tu nombre completo?"
-        elif user_input == "3":
-            reply = "🎁 Promociones activas:\n- 2x1 en campañas publicitarias durante mayo\n- 25% en páginas web hasta este viernes."
-        elif user_input == "4":
-            reply = "📄 Descarga aquí nuestro catálogo: https://example.com/catalogo.pdf"
-        elif user_input == "5":
-            enlace = "https://wa.me/593987654321?text=Hola%2C%20necesito%20ayuda%20con%20mi%20asesor%C3%ADa"
-            reply = (
-                "👤 Te transfiero con un asesor humano.\n"
-                "🕘 Atención de Lunes a Viernes, 9:00 am a 6:00 pm\n"
-                f"👉 Haz clic aquí para escribirle directamente por WhatsApp:\n{enlace}\n\n"
-                "Casos comunes:\n- Consultas sobre propuestas o precios\n- Problemas con formularios o facturación"
-            )
+        elif step == "menu":
+            if user_input == "1":
+                reply = (
+                    "Ofrecemos:\n- Campañas en Meta, Google, TikTok, X\n- Branding y posicionamiento\n"
+                    "- Diseño web (SEO/SEM)\n- Foto y video profesional\n- COFEPRIS (salud)\n"
+                    "- Consultoría comercial\n\n¿Deseas agendar asesoría gratuita? (Escribe '2')"
+                )
+            elif user_input == "2":
+                session["step"] = "nombre"
+                reply = "Perfecto. ¿Cuál es tu nombre completo?"
+            elif user_input == "3":
+                reply = "🎁 Promociones activas:\n- 2x1 en campañas publicitarias durante mayo\n- 25% en páginas web hasta este viernes."
+            elif user_input == "4":
+                reply = "📄 Descarga aquí nuestro catálogo: https://example.com/catalogo.pdf"
+            elif user_input == "5":
+                enlace = "https://wa.me/593987654321?text=Hola%2C%20necesito%20ayuda%20con%20mi%20asesor%C3%ADa"
+                reply = (
+                    "👤 Te transfiero con un asesor humano.\n"
+                    "🕘 Atención de Lunes a Viernes, 9:00 am a 6:00 pm\n"
+                    f"👉 Haz clic aquí para escribirle directamente por WhatsApp:\n{enlace}\n\n"
+                    "Casos comunes:\n- Consultas sobre propuestas o precios\n- Problemas con formularios o facturación"
+                )
+                session["step"] = "menu"
+                session["data"] = {}
+            else:
+                reply = "Opción no válida. Escribe 'menu' para ver opciones."
+        elif step == "nombre":
+            data["Nombre"] = user_input
+            session["step"] = "telefono"
+            reply = "¿Cuál es tu número de teléfono?"
+        elif step == "telefono":
+            data["Telefono"] = user_input
+            session["step"] = "email"
+            reply = "¿Cuál es tu correo electrónico?"
+        elif step == "email":
+            data["Email"] = user_input
+            session["step"] = "especialidad"
+            reply = "¿Cuál es tu especialidad o giro?"
+        elif step == "especialidad":
+            data["Especialidad"] = user_input
+            session["step"] = "fecha"
+            reply = "¿Qué fecha y hora (dd/mm/yyyy hh:mm) prefieres para tu asesoría?"
+        elif step == "fecha":
+            try:
+                fecha, hora = user_input.split()
+                data["Fecha"] = fecha
+                data["Hora"] = hora
+
+                payload = {"records": [{"fields": data}]}
+                response = requests.post(AIRTABLE_URL, headers=HEADERS, json=payload)
+
+                if response.status_code in [200, 201]:
+                    reply = "✅ ¡Gracias! Hemos registrado tu asesoría. Escribe 'menu' para volver a empezar."
+                else:
+                    reply = "❌ Error al guardar los datos. Intenta más tarde."
+            except ValueError:
+                reply = "❌ Por favor, ingresa la fecha y hora en el formato correcto: dd/mm/yyyy hh:mm"
+            except Exception as e:
+                reply = f"❌ Error inesperado: {e}"
+
             session["step"] = "menu"
             session["data"] = {}
         else:
-            reply = "Opción no válida. Escribe 'menu' para ver opciones."
-    elif step == "nombre":
-        data["Nombre"] = user_input
-        session["step"] = "telefono"
-        reply = "¿Cuál es tu número de teléfono?"
-    elif step == "telefono":
-        data["Telefono"] = user_input
-        session["step"] = "email"
-        reply = "¿Cuál es tu correo electrónico?"
-    elif step == "email":
-        data["Email"] = user_input
-        session["step"] = "especialidad"
-        reply = "¿Cuál es tu especialidad o giro?"
-    elif step == "especialidad":
-        data["Especialidad"] = user_input
-        session["step"] = "fecha"
-        reply = "¿Qué fecha y hora (dd/mm/yyyy hh:mm) prefieres para tu asesoría?"
-    elif step == "fecha":
-        try:
-            fecha, hora = user_input.split()
-            data["Fecha"] = fecha
-            data["Hora"] = hora
-
-            payload = {"records": [{"fields": data}]}
-            response = requests.post(AIRTABLE_URL, headers=HEADERS, json=payload)
-
-            if response.status_code in [200, 201]:
-                reply = "✅ ¡Gracias! Hemos registrado tu asesoría. Escribe 'menu' para volver a empezar."
-            else:
-                reply = "❌ Error al guardar los datos. Intenta más tarde."
-        except ValueError:
-            reply = "❌ Por favor, ingresa la fecha y hora en el formato correcto: dd/mm/yyyy hh:mm"
-        except Exception as e:
-            reply = f"❌ Error inesperado: {e}"
-
+            reply = "❌ No entendí tu mensaje. Escribe 'menu' para comenzar de nuevo."
+    except Exception as e:
+        reply = f"❌ Error inesperado en el servidor: {e}"
         session["step"] = "menu"
         session["data"] = {}
-    else:
-        reply = "No entendí tu mensaje. Escribe 'menu' para ver las opciones."
 
     return PlainTextResponse(reply)
