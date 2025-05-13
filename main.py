@@ -64,7 +64,7 @@ async def whatsapp_webhook(
                 reply = "📄 Catálogo: https://example.com/catalogo.pdf"
             elif user_input == "5":
                 print("📤 Redirigiendo a WhatsApp asesor")
-                enlace = "https://wa.me/593986138541?text=Hola%2C%20necesito%20ayuda%20con%20mi%20asesor%C3%ADa"
+                enlace = "https://wa.me/593987345983?text=Hola%2C%20necesito%20ayuda%20con%20mi%20asesor%C3%ADa"
                 reply = (
                     "👤 Te transfiero con un asesor humano.\n"
                     "🕘 Lunes a Viernes, 9:00 am a 6:00 pm\n"
